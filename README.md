@@ -36,9 +36,11 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 </td>
 <td valign="top" width="42%" align="center">
-
 <img src="./assets/stats.svg" width="380" alt="Rajesh's GitHub activity — contributions, repositories, stars, and top languages" />
-
 </td>
+<p align="center">
+  <!-- 5. GITHUB PROFILE VIEWS (At the very bottom) -->
+  <img src="https://komarev.com/ghpvc/?username=rrpixel&label=Profile%20Views&color=0e76a8&style=flat-square" alt="Profile Views" />
+</p>
 </tr>
 </table>
