@@ -11,7 +11,7 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <!-- REPO_TOTAL:START -->
 
-📦 **— repositories** — counting… (updates automatically)
+📦 **2 repositories** — 2 public, 0 private
 
 <!-- REPO_TOTAL:END -->
 
@@ -41,7 +41,13 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <!-- REPOS:START -->
 
-_Updates automatically — run the Action once to populate this table._
+_2 public repos shown below · 0 private repos exist but aren't listed here, only counted above_
+
+| Repo | Language | Stars | Last updated |
+|---|---|---|---|
+| [RajeshRathodcom](https://github.com/RajeshRathodcom/RajeshRathodcom) | JavaScript | 0 | Jul 2026 |
+| [exp-form-whatsapp-integration](https://github.com/RajeshRathodcom/exp-form-whatsapp-integration) | PHP | 0 | Jun 2026 |
+
 
 <!-- REPOS:END -->
 
