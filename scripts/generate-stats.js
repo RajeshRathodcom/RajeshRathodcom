@@ -1,7 +1,9 @@
 /**
  * generate-stats.js
  * Pulls live GitHub stats via the GraphQL API and renders them into a
- * monochrome + single-accent SVG card, styled after Apple's spec-sheet pages.
+ * transparent, borderless SVG — monochrome + single accent, styled after
+ * Apple's spec-sheet pages. No background panel, no card border: the text
+ * sits directly on the page, so it needs a light and dark variant.
  *
  * Requires env vars:
  *   GH_USERNAME   - the profile username (e.g. RajeshRathodcom)
@@ -10,7 +12,7 @@
  *                   Private repo names/content are never rendered — only
  *                   the aggregate number is used.
  *
- * Output: assets/stats.svg
+ * Output: assets/stats-dark.svg, assets/stats-light.svg
  */
 
 const fs = require("fs");
@@ -20,16 +22,6 @@ const https = require("https");
 const USERNAME = process.env.GH_USERNAME || "RajeshRathodcom";
 const TOKEN = process.env.GH_TOKEN;
 
-// ---- design tokens -------------------------------------------------------
-const COLORS = {
-  bg: "#1D1D1F",
-  hairline: "#333336",
-  textPrimary: "#F5F5F7",
-  textSecondary: "#86868B",
-  accent: "#0071E3",
-  trackDim1: "#48484A",
-  trackDim2: "#2C2C2E",
-};
 const FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif";
 
@@ -138,19 +130,30 @@ async function main() {
     .slice(0, 4)
     .map(([name, size]) => ({ name, pct: (size / totalBytes) * 100 }));
 
-  const svg = renderSvg({
+  const svgDark = renderSvg({
     totalContributions,
     publicRepoCount,
     privateRepoCount,
     totalStars,
     followers,
     topLangs,
+    theme: "dark",
+  });
+  const svgLight = renderSvg({
+    totalContributions,
+    publicRepoCount,
+    privateRepoCount,
+    totalStars,
+    followers,
+    topLangs,
+    theme: "light",
   });
 
-  const outPath = path.join(__dirname, "..", "assets", "stats.svg");
-  fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, svg, "utf8");
-  console.log(`Wrote ${outPath}`);
+  const outDir = path.join(__dirname, "..", "assets");
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, "stats-dark.svg"), svgDark, "utf8");
+  fs.writeFileSync(path.join(outDir, "stats-light.svg"), svgLight, "utf8");
+  console.log(`Wrote ${outDir}/stats-dark.svg and stats-light.svg`);
 }
 
 function renderSvg({
@@ -160,7 +163,26 @@ function renderSvg({
   totalStars,
   followers,
   topLangs,
+  theme,
 }) {
+  const palette =
+    theme === "light"
+      ? {
+          textPrimary: "#1D1D1F",
+          textSecondary: "#6E6E73",
+          accent: "#0071E3",
+          hairline: "#D2D2D7",
+          trackDim1: "#C7C7CC",
+          trackDim2: "#E5E5EA",
+        }
+      : {
+          textPrimary: "#F5F5F7",
+          textSecondary: "#86868B",
+          accent: "#2997FF",
+          hairline: "#333336",
+          trackDim1: "#48484A",
+          trackDim2: "#2C2C2E",
+        };
   const width = 400;
   const height = 610;
   const padX = 32;
@@ -172,8 +194,8 @@ function renderSvg({
   const colL = padX;
   const colR = width - padX;
   const cell = (x, anchor, y, value, label) => `
-    <text x="${x}" y="${y}" font-family="${FONT}" font-size="30" font-weight="600" letter-spacing="-0.5" fill="${COLORS.textPrimary}" text-anchor="${anchor}">${escapeXml(value)}</text>
-    <text x="${x}" y="${y + 20}" font-family="${FONT}" font-size="10.5" letter-spacing="1" fill="${COLORS.textSecondary}" text-anchor="${anchor}">${escapeXml(label.toUpperCase())}</text>`;
+    <text x="${x}" y="${y}" font-family="${FONT}" font-size="30" font-weight="600" letter-spacing="-0.5" fill="${palette.textPrimary}" text-anchor="${anchor}">${escapeXml(value)}</text>
+    <text x="${x}" y="${y + 20}" font-family="${FONT}" font-size="10.5" letter-spacing="1" fill="${palette.textSecondary}" text-anchor="${anchor}">${escapeXml(label.toUpperCase())}</text>`;
 
   const row1Y = gridTop;
   const row2Y = gridTop + rowH;
@@ -183,7 +205,7 @@ function renderSvg({
   ${cell(colR, "end", row1Y, formatNumber(privateRepoCount), "Private repos")}
   ${cell(colL, "start", row2Y, formatNumber(totalStars), "Stars earned")}
   ${cell(colR, "end", row2Y, formatNumber(followers), "Followers")}
-  <line x1="${padX}" y1="${row1Y + 34}" x2="${width - padX}" y2="${row1Y + 34}" stroke="${COLORS.hairline}" stroke-width="1" />`;
+  <line x1="${padX}" y1="${row1Y + 34}" x2="${width - padX}" y2="${row1Y + 34}" stroke="${palette.hairline}" stroke-width="1" />`;
 
   // ---- Segmented language bar ------------------------------------------
   const barY = gridTop + rowH + 70;
@@ -197,7 +219,7 @@ function renderSvg({
     const seg = {
       x: cursorX,
       w,
-      color: i === 0 ? COLORS.accent : i === 1 ? COLORS.trackDim1 : COLORS.trackDim2,
+      color: i === 0 ? palette.accent : i === 1 ? palette.trackDim1 : palette.trackDim2,
     };
     cursorX += w + gap;
     return seg;
@@ -206,11 +228,11 @@ function renderSvg({
   const legendRows = topLangs
     .map((l, i) => {
       const y = barY + 40 + i * 22;
-      const dotColor = i === 0 ? COLORS.accent : i === 1 ? COLORS.trackDim1 : COLORS.trackDim2;
+      const dotColor = i === 0 ? palette.accent : i === 1 ? palette.trackDim1 : palette.trackDim2;
       return `
     <circle cx="${padX + 5}" cy="${y - 4}" r="4" fill="${dotColor}" />
-    <text x="${padX + 18}" y="${y}" font-family="${FONT}" font-size="13" fill="${COLORS.textPrimary}">${escapeXml(l.name)}</text>
-    <text x="${width - padX}" y="${y}" font-family="${FONT}" font-size="13" fill="${COLORS.textSecondary}" text-anchor="end">${l.pct.toFixed(1)}%</text>`;
+    <text x="${padX + 18}" y="${y}" font-family="${FONT}" font-size="13" fill="${palette.textPrimary}">${escapeXml(l.name)}</text>
+    <text x="${width - padX}" y="${y}" font-family="${FONT}" font-size="13" fill="${palette.textSecondary}" text-anchor="end">${l.pct.toFixed(1)}%</text>`;
     })
     .join("");
 
@@ -222,19 +244,17 @@ function renderSvg({
   });
 
   return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GitHub activity stats for ${escapeXml(USERNAME)}">
-  <rect width="${width}" height="${height}" rx="20" fill="${COLORS.bg}" />
-  <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="19.5" fill="none" stroke="${COLORS.hairline}" />
+  <text x="${padX}" y="48" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="2" fill="${palette.textSecondary}">GITHUB ACTIVITY</text>
 
-  <text x="${padX}" y="48" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="2" fill="${COLORS.textSecondary}">GITHUB ACTIVITY</text>
+  <text x="${padX}" y="112" font-family="${FONT}" font-size="60" font-weight="700" letter-spacing="-1.5" fill="${palette.accent}">${formatNumber(totalContributions)}</text>
+  <text x="${padX}" y="136" font-family="${FONT}" font-size="13" fill="${palette.textSecondary}">contributions in the past year</text>
 
-  <text x="${padX}" y="112" font-family="${FONT}" font-size="60" font-weight="700" letter-spacing="-1.5" fill="${COLORS.accent}">${formatNumber(totalContributions)}</text>
-  <text x="${padX}" y="136" font-family="${FONT}" font-size="13" fill="${COLORS.textSecondary}">contributions in the past year</text>
 
-  <line x1="${padX}" y1="160" x2="${width - padX}" y2="160" stroke="${COLORS.hairline}" stroke-width="1" />
+  <line x1="${padX}" y1="160" x2="${width - padX}" y2="160" stroke="${palette.hairline}" stroke-width="1" />
 
   ${statGrid}
 
-  <text x="${padX}" y="${barY - 24}" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="2" fill="${COLORS.textSecondary}">TOP LANGUAGES</text>
+  <text x="${padX}" y="${barY - 24}" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="2" fill="${palette.textSecondary}">TOP LANGUAGES</text>
 
   ${segments
     .map(
@@ -245,10 +265,10 @@ function renderSvg({
 
   ${legendRows}
 
-  <line x1="${padX}" y1="${footerY - 18}" x2="${width - padX}" y2="${footerY - 18}" stroke="${COLORS.hairline}" stroke-width="1" />
-  <text x="${padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${COLORS.textSecondary}">Building at</text>
-  <text x="${padX + 52}" y="${footerY + 10}" font-family="${FONT}" font-size="11" font-weight="600" fill="${COLORS.textPrimary}">@WordPlus-io</text>
-  <text x="${width - padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${COLORS.textSecondary}" text-anchor="end">Updated ${updated}</text>
+  <line x1="${padX}" y1="${footerY - 18}" x2="${width - padX}" y2="${footerY - 18}" stroke="${palette.hairline}" stroke-width="1" />
+  <text x="${padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${palette.textSecondary}">Building at</text>
+  <text x="${padX + 52}" y="${footerY + 10}" font-family="${FONT}" font-size="11" font-weight="600" fill="${palette.textPrimary}">@WordPlus-io</text>
+  <text x="${width - padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${palette.textSecondary}" text-anchor="end">Updated ${updated}</text>
 </svg>`;
 }
 
