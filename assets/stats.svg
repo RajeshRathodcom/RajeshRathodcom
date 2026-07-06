@@ -14,7 +14,7 @@
     <text x="32" y="178" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="-0.5" fill="#F5F5F7" text-anchor="start">2</text>
     <text x="32" y="198" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" letter-spacing="1" fill="#86868B" text-anchor="start">PUBLIC REPOS</text>
   
-    <text x="368" y="178" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="-0.5" fill="#F5F5F7" text-anchor="end">0</text>
+    <text x="368" y="178" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="-0.5" fill="#F5F5F7" text-anchor="end">23</text>
     <text x="368" y="198" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" letter-spacing="1" fill="#86868B" text-anchor="end">PRIVATE REPOS</text>
   
     <text x="32" y="256" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="-0.5" fill="#F5F5F7" text-anchor="start">0</text>

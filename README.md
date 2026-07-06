@@ -11,7 +11,7 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <!-- REPO_TOTAL:START -->
 
-📦 **2 repositories** — 2 public, 0 private
+📦 **25 repositories** — 2 public, 23 private
 
 <!-- REPO_TOTAL:END -->
 
@@ -41,7 +41,7 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <!-- REPOS:START -->
 
-_2 public repos shown below · 0 private repos exist but aren't listed here, only counted above_
+_2 public repos shown below · 23 private repos exist but aren't listed here, only counted above_
 
 | Repo | Language | Stars | Last updated |
 |---|---|---|---|
