@@ -5,12 +5,15 @@
  * Apple's spec-sheet pages. No background panel, no card border: the text
  * sits directly on the page, so it needs a light and dark variant.
  *
+ * Counts repos from your personal account PLUS any organization where you
+ * are an owner/admin (viewerCanAdminister) — e.g. wordplus-in.
+ *
  * Requires env vars:
  *   GH_USERNAME   - the profile username (e.g. RajeshRathodcom)
- *   GH_TOKEN      - classic PAT with `read:user` + `repo` scopes.
- *                   `repo` is required to see your private repo COUNT.
- *                   Private repo names/content are never rendered — only
- *                   the aggregate number is used.
+ *   GH_TOKEN      - classic PAT with `read:user`, `repo`, and `read:org` scopes.
+ *                   `repo` + `read:org` are required to see private repo COUNTS
+ *                   (personal and org-owned). Private repo names/content are
+ *                   never rendered — only the aggregate numbers are used.
  *
  * Output: assets/stats-dark.svg, assets/stats-light.svg
  */
@@ -26,19 +29,14 @@ const FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif";
 
 // ---- GraphQL query --------------------------------------------------------
-// Two repository connections:
-//  - `allRepos`: every owned repo (public + private) — used ONLY for counts
-//  - `publicRepos`: public owned repos — used for stars + language mix
-//    (nothing about private repos beyond their count is ever read)
+// Personal repos (public + private counts, public repo details for stars/langs)
+// plus, for every org the viewer administers, the same shape of data.
 const query = `
 query ($login: String!) {
   user(login: $login) {
     followers { totalCount }
     contributionsCollection {
       contributionCalendar { totalContributions }
-    }
-    allRepos: repositories(ownerAffiliations: OWNER, isFork: false) {
-      totalCount
     }
     privateRepos: repositories(ownerAffiliations: OWNER, isFork: false, privacy: PRIVATE) {
       totalCount
@@ -49,6 +47,24 @@ query ($login: String!) {
         stargazerCount
         languages(first: 5, orderBy: {field: SIZE, direction: DESC}) {
           edges { size node { name } }
+        }
+      }
+    }
+    organizations(first: 20) {
+      nodes {
+        login
+        viewerCanAdminister
+        privateRepos: repositories(isFork: false, privacy: PRIVATE) {
+          totalCount
+        }
+        publicRepos: repositories(first: 100, privacy: PUBLIC, isFork: false) {
+          totalCount
+          nodes {
+            stargazerCount
+            languages(first: 5, orderBy: {field: SIZE, direction: DESC}) {
+              edges { size node { name } }
+            }
+          }
         }
       }
     }
@@ -109,17 +125,26 @@ async function main() {
 
   const totalContributions =
     user.contributionsCollection.contributionCalendar.totalContributions;
-  const publicRepoCount = user.publicRepos.totalCount;
-  const privateRepoCount = user.privateRepos.totalCount;
-  const totalStars = user.publicRepos.nodes.reduce(
-    (sum, r) => sum + r.stargazerCount,
-    0
-  );
   const followers = user.followers.totalCount;
 
-  // Aggregate language byte-size across all owned public repos
+  // Start with personal account totals
+  let publicRepoCount = user.publicRepos.totalCount;
+  let privateRepoCount = user.privateRepos.totalCount;
+  let publicRepoNodes = [...user.publicRepos.nodes];
+
+  // Fold in every organization the viewer administers (owns)
+  const ownedOrgs = user.organizations.nodes.filter((o) => o.viewerCanAdminister);
+  for (const org of ownedOrgs) {
+    publicRepoCount += org.publicRepos.totalCount;
+    privateRepoCount += org.privateRepos.totalCount;
+    publicRepoNodes.push(...org.publicRepos.nodes);
+  }
+
+  const totalStars = publicRepoNodes.reduce((sum, r) => sum + r.stargazerCount, 0);
+
+  // Aggregate language byte-size across all public repos, personal + owned orgs
   const langTotals = {};
-  for (const repo of user.publicRepos.nodes) {
+  for (const repo of publicRepoNodes) {
     for (const edge of repo.languages.edges) {
       langTotals[edge.node.name] = (langTotals[edge.node.name] || 0) + edge.size;
     }
@@ -267,7 +292,7 @@ function renderSvg({
 
   <line x1="${padX}" y1="${footerY - 18}" x2="${width - padX}" y2="${footerY - 18}" stroke="${palette.hairline}" stroke-width="1" />
   <text x="${padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${palette.textSecondary}">Building at</text>
-  <text x="${padX + 52}" y="${footerY + 10}" font-family="${FONT}" font-size="11" font-weight="600" fill="${palette.textPrimary}">@WordPlus-io</text>
+  <text x="${padX + 52}" y="${footerY + 10}" font-family="${FONT}" font-size="11" font-weight="600" fill="${palette.textPrimary}">@wordplus-in</text>
   <text x="${width - padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${palette.textSecondary}" text-anchor="end">Updated ${updated}</text>
 </svg>`;
 }
