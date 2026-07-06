@@ -5,9 +5,10 @@
  *
  * Requires env vars:
  *   GH_USERNAME   - the profile username (e.g. RajeshRathodcom)
- *   GH_TOKEN      - a token with `read:user` + `repo` (repo only needed if you
- *                   want private contributions counted; otherwise public_repo
- *                   scope is enough)
+ *   GH_TOKEN      - classic PAT with `read:user` + `repo` scopes.
+ *                   `repo` is required to see your private repo COUNT.
+ *                   Private repo names/content are never rendered — only
+ *                   the aggregate number is used.
  *
  * Output: assets/stats.svg
  */
@@ -22,7 +23,6 @@ const TOKEN = process.env.GH_TOKEN;
 // ---- design tokens -------------------------------------------------------
 const COLORS = {
   bg: "#1D1D1F",
-  panel: "#000000",
   hairline: "#333336",
   textPrimary: "#F5F5F7",
   textSecondary: "#86868B",
@@ -34,6 +34,10 @@ const FONT =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif";
 
 // ---- GraphQL query --------------------------------------------------------
+// Two repository connections:
+//  - `allRepos`: every owned repo (public + private) — used ONLY for counts
+//  - `publicRepos`: public owned repos — used for stars + language mix
+//    (nothing about private repos beyond their count is ever read)
 const query = `
 query ($login: String!) {
   user(login: $login) {
@@ -41,7 +45,13 @@ query ($login: String!) {
     contributionsCollection {
       contributionCalendar { totalContributions }
     }
-    repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false) {
+    allRepos: repositories(ownerAffiliations: OWNER, isFork: false) {
+      totalCount
+    }
+    privateRepos: repositories(ownerAffiliations: OWNER, isFork: false, privacy: PRIVATE) {
+      totalCount
+    }
+    publicRepos: repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false) {
       totalCount
       nodes {
         stargazerCount
@@ -107,8 +117,9 @@ async function main() {
 
   const totalContributions =
     user.contributionsCollection.contributionCalendar.totalContributions;
-  const totalRepos = user.repositories.totalCount;
-  const totalStars = user.repositories.nodes.reduce(
+  const publicRepoCount = user.publicRepos.totalCount;
+  const privateRepoCount = user.privateRepos.totalCount;
+  const totalStars = user.publicRepos.nodes.reduce(
     (sum, r) => sum + r.stargazerCount,
     0
   );
@@ -116,7 +127,7 @@ async function main() {
 
   // Aggregate language byte-size across all owned public repos
   const langTotals = {};
-  for (const repo of user.repositories.nodes) {
+  for (const repo of user.publicRepos.nodes) {
     for (const edge of repo.languages.edges) {
       langTotals[edge.node.name] = (langTotals[edge.node.name] || 0) + edge.size;
     }
@@ -129,7 +140,8 @@ async function main() {
 
   const svg = renderSvg({
     totalContributions,
-    totalRepos,
+    publicRepoCount,
+    privateRepoCount,
     totalStars,
     followers,
     topLangs,
@@ -141,14 +153,40 @@ async function main() {
   console.log(`Wrote ${outPath}`);
 }
 
-function renderSvg({ totalContributions, totalRepos, totalStars, followers, topLangs }) {
+function renderSvg({
+  totalContributions,
+  publicRepoCount,
+  privateRepoCount,
+  totalStars,
+  followers,
+  topLangs,
+}) {
   const width = 400;
-  const height = 560;
+  const height = 610;
   const padX = 32;
   const contentW = width - padX * 2;
 
-  // Segmented language bar geometry
-  const barY = 340;
+  // ---- 2x2 stat grid --------------------------------------------------
+  const gridTop = 178;
+  const rowH = 78;
+  const colL = padX;
+  const colR = width - padX;
+  const cell = (x, anchor, y, value, label) => `
+    <text x="${x}" y="${y}" font-family="${FONT}" font-size="30" font-weight="600" letter-spacing="-0.5" fill="${COLORS.textPrimary}" text-anchor="${anchor}">${escapeXml(value)}</text>
+    <text x="${x}" y="${y + 20}" font-family="${FONT}" font-size="10.5" letter-spacing="1" fill="${COLORS.textSecondary}" text-anchor="${anchor}">${escapeXml(label.toUpperCase())}</text>`;
+
+  const row1Y = gridTop;
+  const row2Y = gridTop + rowH;
+
+  const statGrid = `
+  ${cell(colL, "start", row1Y, formatNumber(publicRepoCount), "Public repos")}
+  ${cell(colR, "end", row1Y, formatNumber(privateRepoCount), "Private repos")}
+  ${cell(colL, "start", row2Y, formatNumber(totalStars), "Stars earned")}
+  ${cell(colR, "end", row2Y, formatNumber(followers), "Followers")}
+  <line x1="${padX}" y1="${row1Y + 34}" x2="${width - padX}" y2="${row1Y + 34}" stroke="${COLORS.hairline}" stroke-width="1" />`;
+
+  // ---- Segmented language bar ------------------------------------------
+  const barY = gridTop + rowH + 70;
   const barH = 14;
   const barR = 7;
   const gap = 3;
@@ -156,14 +194,18 @@ function renderSvg({ totalContributions, totalRepos, totalStars, followers, topL
   let cursorX = padX;
   const segments = topLangs.map((l, i) => {
     const w = Math.max((l.pct / 100) * usableW, 6);
-    const seg = { x: cursorX, w, color: i === 0 ? COLORS.accent : i === 1 ? COLORS.trackDim1 : COLORS.trackDim2 };
+    const seg = {
+      x: cursorX,
+      w,
+      color: i === 0 ? COLORS.accent : i === 1 ? COLORS.trackDim1 : COLORS.trackDim2,
+    };
     cursorX += w + gap;
     return seg;
   });
 
   const legendRows = topLangs
     .map((l, i) => {
-      const y = 380 + i * 22;
+      const y = barY + 40 + i * 22;
       const dotColor = i === 0 ? COLORS.accent : i === 1 ? COLORS.trackDim1 : COLORS.trackDim2;
       return `
     <circle cx="${padX + 5}" cy="${y - 4}" r="4" fill="${dotColor}" />
@@ -172,19 +214,12 @@ function renderSvg({ totalContributions, totalRepos, totalStars, followers, topL
     })
     .join("");
 
+  const footerY = barY + 40 + topLangs.length * 22 + 24;
   const updated = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
-
-  const stat = (x, anchor, value, label) => `
-    <text x="${x}" y="228" font-family="${FONT}" font-size="26" font-weight="600" letter-spacing="-0.5" fill="${COLORS.textPrimary}" text-anchor="${anchor}">${escapeXml(value)}</text>
-    <text x="${x}" y="248" font-family="${FONT}" font-size="10.5" letter-spacing="1" fill="${COLORS.textSecondary}" text-anchor="${anchor}">${escapeXml(label.toUpperCase())}</text>`;
-
-  const col1 = padX;
-  const col2 = width / 2;
-  const col3 = width - padX;
 
   return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GitHub activity stats for ${escapeXml(USERNAME)}">
   <rect width="${width}" height="${height}" rx="20" fill="${COLORS.bg}" />
@@ -195,15 +230,11 @@ function renderSvg({ totalContributions, totalRepos, totalStars, followers, topL
   <text x="${padX}" y="112" font-family="${FONT}" font-size="60" font-weight="700" letter-spacing="-1.5" fill="${COLORS.accent}">${formatNumber(totalContributions)}</text>
   <text x="${padX}" y="136" font-family="${FONT}" font-size="13" fill="${COLORS.textSecondary}">contributions in the past year</text>
 
-  <line x1="${padX}" y1="168" x2="${width - padX}" y2="168" stroke="${COLORS.hairline}" stroke-width="1" />
+  <line x1="${padX}" y1="160" x2="${width - padX}" y2="160" stroke="${COLORS.hairline}" stroke-width="1" />
 
-  ${stat(col1, "start", formatNumber(totalRepos), "Repositories")}
-  ${stat(col2, "middle", formatNumber(totalStars), "Stars earned")}
-  ${stat(col3, "end", formatNumber(followers), "Followers")}
+  ${statGrid}
 
-  <line x1="${padX}" y1="284" x2="${width - padX}" y2="284" stroke="${COLORS.hairline}" stroke-width="1" />
-
-  <text x="${padX}" y="316" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="2" fill="${COLORS.textSecondary}">TOP LANGUAGES</text>
+  <text x="${padX}" y="${barY - 24}" font-family="${FONT}" font-size="11" font-weight="600" letter-spacing="2" fill="${COLORS.textSecondary}">TOP LANGUAGES</text>
 
   ${segments
     .map(
@@ -214,10 +245,10 @@ function renderSvg({ totalContributions, totalRepos, totalStars, followers, topL
 
   ${legendRows}
 
-  <line x1="${padX}" y1="500" x2="${width - padX}" y2="500" stroke="${COLORS.hairline}" stroke-width="1" />
-  <text x="${padX}" y="528" font-family="${FONT}" font-size="11" fill="${COLORS.textSecondary}">Building at</text>
-  <text x="${padX}" y="528" font-family="${FONT}" font-size="11" font-weight="600" fill="${COLORS.textPrimary}" dx="52">@WordPlus-io</text>
-  <text x="${width - padX}" y="528" font-family="${FONT}" font-size="11" fill="${COLORS.textSecondary}" text-anchor="end">Updated ${updated}</text>
+  <line x1="${padX}" y1="${footerY - 18}" x2="${width - padX}" y2="${footerY - 18}" stroke="${COLORS.hairline}" stroke-width="1" />
+  <text x="${padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${COLORS.textSecondary}">Building at</text>
+  <text x="${padX + 52}" y="${footerY + 10}" font-family="${FONT}" font-size="11" font-weight="600" fill="${COLORS.textPrimary}">@WordPlus-io</text>
+  <text x="${width - padX}" y="${footerY + 10}" font-family="${FONT}" font-size="11" fill="${COLORS.textSecondary}" text-anchor="end">Updated ${updated}</text>
 </svg>`;
 }
 
