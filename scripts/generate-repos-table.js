@@ -90,14 +90,6 @@ async function main() {
   const privateCount = user.privateRepos.totalCount;
   const totalCount = publicCount + privateCount;
 
-  const rows = user.publicRepos.nodes
-    .map((r) => {
-      const lang = r.primaryLanguage ? r.primaryLanguage.name : "—";
-      const desc = (r.description || "").replace(/\|/g, "\\|");
-      return `| [${r.name}](${r.url}) | ${lang} | ${r.stargazerCount} | ${fmtDate(r.updatedAt)} |\n${desc ? `<sub>${desc}</sub> | | | |\n` : ""}`;
-    })
-    .join("");
-
   const totalLine = `📦 **${totalCount} repositories** — ${publicCount} public, ${privateCount} private`;
 
   const rows = user.publicRepos.nodes
