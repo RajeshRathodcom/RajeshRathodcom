@@ -16,6 +16,22 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <br>
 
+**Repository directory**
+
+<!-- REPOS:START -->
+
+_2 public repos shown below · 23 private repos exist but aren't listed here, only counted above_
+
+| Repo | Language | Stars | Last updated |
+|---|---|---|---|
+| [RajeshRathodcom](https://github.com/RajeshRathodcom/RajeshRathodcom) | JavaScript | 0 | Jul 2026 |
+| [exp-form-whatsapp-integration](https://github.com/RajeshRathodcom/exp-form-whatsapp-integration) | PHP | 0 | Jun 2026 |
+
+
+<!-- REPOS:END -->
+
+<br>
+
 **What I actually do**
 
 - Design systems in Figma (variables, component properties, slot patterns) that survive contact with real code
@@ -34,23 +50,6 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 | **NarratIQ** | AI reading companion with Hindi/Marathi NLP support, built around the Gemini API |
 | **OTPulse** | Multi-channel OTP-as-a-service — Node/Express, PostgreSQL, Redis, Next.js |
 
-<br>
-
-**Repository directory**
-
-<!-- REPOS:START -->
-
-_2 public repos shown below · 23 private repos exist but aren't listed here, only counted above_
-
-| Repo | Language | Stars | Last updated |
-|---|---|---|---|
-| [RajeshRathodcom](https://github.com/RajeshRathodcom/RajeshRathodcom) | JavaScript | 0 | Jul 2026 |
-| [exp-form-whatsapp-integration](https://github.com/RajeshRathodcom/exp-form-whatsapp-integration) | PHP | 0 | Jun 2026 |
-
-
-<!-- REPOS:END -->
-
-<br>
 
 **Find me elsewhere**
 [Portfolio](https://rajeshrathod.com) · [LinkedIn](https://www.linkedin.com/in/rajeshrathodcom) · [Wordplus Studio](https://github.com/WordPlus-io)
