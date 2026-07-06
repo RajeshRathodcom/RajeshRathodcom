@@ -6,29 +6,13 @@
 
 I move between Figma and the codebase without treating them as separate jobs — I design the system, then build the thing that ships it.
 
-Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune, and studying Economics on the side because I like knowing why a market behaves the way it does, not just how to build for it.
+Currently building **[Wordplus Studio](https://github.com/wordplus-in)** in Pune, and studying Economics on the side because I like knowing why a market behaves the way it does, not just how to build for it.
 
 <!-- REPO_TOTAL:START -->
 
-📦 **25 repositories** — 2 public, 23 private
+📦 **— repositories** — counting… (updates automatically)
 
 <!-- REPO_TOTAL:END -->
-
-<br>
-
-**Repository directory**
-
-<!-- REPOS:START -->
-
-_2 public repos shown below · 23 private repos exist but aren't listed here, only counted above_
-
-| Repo | Language | Stars | Last updated |
-|---|---|---|---|
-| [RajeshRathodcom](https://github.com/RajeshRathodcom/RajeshRathodcom) | JavaScript | 0 | Jul 2026 |
-| [exp-form-whatsapp-integration](https://github.com/RajeshRathodcom/exp-form-whatsapp-integration) | PHP | 0 | Jun 2026 |
-
-
-<!-- REPOS:END -->
 
 <br>
 
@@ -50,9 +34,20 @@ _2 public repos shown below · 23 private repos exist but aren't listed here, on
 | **NarratIQ** | AI reading companion with Hindi/Marathi NLP support, built around the Gemini API |
 | **OTPulse** | Multi-channel OTP-as-a-service — Node/Express, PostgreSQL, Redis, Next.js |
 
+<br>
+
+**Repository directory**
+
+<!-- REPOS:START -->
+
+_Updates automatically — run the Action once to populate this table._
+
+<!-- REPOS:END -->
+
+<br>
 
 **Find me elsewhere**
-[Portfolio](https://rajeshrathod.com) · [LinkedIn](https://www.linkedin.com/in/rajeshrathodcom) · [Wordplus Studio](https://github.com/WordPlus-io)
+[Portfolio](https://rajeshrathod.com) · [LinkedIn](https://www.linkedin.com/in/rajeshrathodcom) · [Wordplus Studio](https://github.com/wordplus-in)
 
 <br>
 
