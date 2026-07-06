@@ -1,6 +1,5 @@
-<table>
-<tr>
-<td valign="top" width="58%">
+<img align="right" src="./assets/stats-dark.svg#gh-dark-mode-only" width="360" alt="Rajesh's GitHub activity — contributions, public/private repo counts, stars, and top languages" />
+<img align="right" src="./assets/stats-light.svg#gh-light-mode-only" width="360" alt="Rajesh's GitHub activity — contributions, public/private repo counts, stars, and top languages" />
 
 # Rajesh Rathod
 ### Design Engineer
@@ -11,7 +10,7 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <!-- REPO_TOTAL:START -->
 
-📦 **25 repositories** — 2 public, 23 private
+📦 **— repositories** — counting… (updates automatically)
 
 <!-- REPO_TOTAL:END -->
 
@@ -24,7 +23,7 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 - Full-stack product builds — React/TypeScript on the front, Node.js/Express + PostgreSQL underneath
 - Organizing WordCamp Pune and the local WordPress meetup — the community side of the same craft
 
-<br>
+<br clear="right">
 
 **Selected builds**
 
@@ -41,13 +40,7 @@ Currently building **[Wordplus Studio](https://github.com/WordPlus-io)** in Pune
 
 <!-- REPOS:START -->
 
-_2 public repos shown below · 23 private repos exist but aren't listed here, only counted above_
-
-| Repo | Language | Stars | Last updated |
-|---|---|---|---|
-| [RajeshRathodcom](https://github.com/RajeshRathodcom/RajeshRathodcom) | JavaScript | 0 | Jul 2026 |
-| [exp-form-whatsapp-integration](https://github.com/RajeshRathodcom/exp-form-whatsapp-integration) | PHP | 0 | Jun 2026 |
-
+_Updates automatically — run the Action once to populate this table._
 
 <!-- REPOS:END -->
 
@@ -55,15 +48,6 @@ _2 public repos shown below · 23 private repos exist but aren't listed here, on
 
 **Find me elsewhere**
 [Portfolio](https://rajeshrathod.com) · [LinkedIn](https://www.linkedin.com/in/rajeshrathodcom) · [Wordplus Studio](https://github.com/WordPlus-io)
-
-</td>
-<td valign="top" width="42%" align="center">
-
-<img src="./assets/stats.svg" width="380" alt="Rajesh's GitHub activity — contributions, public/private repo counts, stars, and top languages" />
-
-</td>
-</tr>
-</table>
 
 <br>
 
